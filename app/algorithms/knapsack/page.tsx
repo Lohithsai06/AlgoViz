@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { algorithmsList } from '@/lib/algorithms-data';
 import DPTableVisualizer from '@/components/DPTableVisualizer';
+import DPPageLayout from '@/components/DPPageLayout';
+import CodeViewer from '@/components/CodeViewer';
 import { generateKnapsackSteps } from '@/lib/steps/knapsackSteps';
 import PseudocodeHighlighter from '@/components/PseudocodeHighlighter';
 import PlayerControls from '@/components/PlayerControls';
@@ -57,66 +59,54 @@ export default function KnapsackPage() {
   const pseudocode = algorithm?.pseudocode || [];
   const activePseudocodeLine = steps[currentStep]?.pseudocodeLine ?? null;
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold neon-text-green mb-2">{algorithm?.title}</h1>
-        <p className="text-gray-400">{algorithm?.description}</p>
-      </div>
+  const visualization = (
+    <DPTableVisualizer steps={steps} currentStepIndex={currentStep} onRequestStepChange={(i) => setCurrentStep(i)} />
+  );
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="glass-card rounded-lg border border-[#39FF14]/20 overflow-hidden">
-            <div className="p-6">
-              <DPTableVisualizer
-                steps={steps}
-                currentStepIndex={currentStep}
-                onRequestStepChange={(i) => setCurrentStep(i)}
-              />
-            </div>
-          </div>
+  const codeContent = (
+    <CodeViewer>{algorithm?.code || ''}</CodeViewer>
+  );
 
-          <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
-            <h3 className="text-lg font-semibold neon-text-blue mb-4">Custom Input</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm text-gray-200">Weights (comma-separated)</label>
-                <input value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
-              </div>
-              <div>
-                <label className="text-sm text-gray-200">Values (comma-separated)</label>
-                <input value={valueInput} onChange={(e) => setValueInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
-              </div>
-              <div className="flex items-center gap-4">
-                <div>
-                  <label className="text-sm text-gray-200">Capacity</label>
-                  <input type="number" value={capacity} onChange={(e) => setCapacity(Math.max(0, Number(e.target.value)))} className="w-28 px-3 py-1 bg-[#0b0b10] rounded border border-gray-800 text-white" />
-                </div>
-                <div className="flex items-end">
-                  <button onClick={handleApply} className="px-4 py-1 bg-[#39FF14] text-black rounded">Apply</button>
-                </div>
-              </div>
-            </div>
-          </div>
+  const infoContent = (
+    <>
+      <PseudocodeHighlighter code={pseudocode} highlightLine={steps[currentStep]?.pseudocodeLine ?? -1} />
+    </>
+  );
+
+  const customInput = (
+    <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
+      <h3 className="text-lg font-semibold neon-text-blue mb-4">Custom Input</h3>
+      <div className="space-y-3">
+        <div>
+          <label className="text-sm text-gray-200">Weights (comma-separated)</label>
+          <input value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
         </div>
-
-        <div className="space-y-6">
-          <PlayerControls
-            isPlaying={isPlaying}
-            onPlayPause={handlePlayPause}
-            onReset={handleReset}
-            onStepBack={handleStepBack}
-            onStepForward={handleStepForward}
-            speed={speed}
-            onSpeedChange={setSpeed}
-          />
-
-          <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
-            <h3 className="text-lg font-semibold neon-text-green mb-4">Pseudocode</h3>
-            <PseudocodeHighlighter code={pseudocode} highlightLine={steps[currentStep]?.pseudocodeLine ?? -1} />
+        <div>
+          <label className="text-sm text-gray-200">Values (comma-separated)</label>
+          <input value={valueInput} onChange={(e) => setValueInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
+        </div>
+        <div className="flex items-center gap-4">
+          <div>
+            <label className="text-sm text-gray-200">Capacity</label>
+            <input type="number" value={capacity} onChange={(e) => setCapacity(Math.max(0, Number(e.target.value)))} className="w-28 px-3 py-1 bg-[#0b0b10] rounded border border-gray-800 text-white" />
+          </div>
+          <div className="flex items-end">
+            <button onClick={handleApply} className="px-4 py-1 bg-[#39FF14] text-black rounded">Apply</button>
           </div>
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <DPPageLayout
+      title={algorithm?.title || 'Knapsack'}
+      description={algorithm?.description}
+      visualization={visualization}
+      codeContent={codeContent}
+      infoContent={infoContent}
+      customInput={customInput}
+      playerControls={<PlayerControls isPlaying={isPlaying} onPlayPause={handlePlayPause} onReset={handleReset} onStepBack={handleStepBack} onStepForward={handleStepForward} speed={speed} onSpeedChange={setSpeed} />}
+    />
   );
 }

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import DPTableVisualizer from '@/components/DPTableVisualizer';
+import DPPageLayout from '@/components/DPPageLayout';
+import CodeViewer from '@/components/CodeViewer';
 import { generateCoinWaysSteps } from '@/lib/steps/generateCoinWaysSteps';
 import PlayerControls from '@/components/PlayerControls';
 import PseudocodeHighlighter from '@/components/PseudocodeHighlighter';
@@ -36,51 +38,47 @@ export default function CoinWaysPage() {
 
   const final = steps.length ? steps[steps.length - 1].table : null;
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold neon-text-green mb-2">Total Ways (Coin Change)</h1>
-        <p className="text-gray-400">Number of ways to make target sum using given coins.</p>
-      </div>
+  const visualization = <DPTableVisualizer steps={steps} currentStepIndex={currentStep} onRequestStepChange={(i) => setCurrentStep(i)} />;
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="glass-card rounded-lg border border-[#39FF14]/20 overflow-hidden">
-            <div className="p-6">
-              <DPTableVisualizer steps={steps} currentStepIndex={currentStep} onRequestStepChange={(i) => setCurrentStep(i)} />
-            </div>
-          </div>
+  const codeContent = <CodeViewer>{''}</CodeViewer>;
 
-          <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
-            <h3 className="text-lg font-semibold neon-text-blue mb-4">Custom Input</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm text-gray-200">Coins (comma-separated)</label>
-                <input value={coinsInput} onChange={(e) => setCoinsInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
-              </div>
-              <div>
-                <label className="text-sm text-gray-200">Target</label>
-                <input type="number" value={target} onChange={(e) => setTarget(Number(e.target.value))} className="w-28 px-3 py-1 bg-[#0b0b10] rounded border border-gray-800 text-white" />
-              </div>
-              <div className="flex items-end">
-                <button onClick={handleApply} className="px-4 py-1 bg-[#39FF14] text-black rounded">Apply</button>
-              </div>
-            </div>
-          </div>
+  const infoContent = (
+    <>
+      <PseudocodeHighlighter code={pseudocode} highlightLine={steps[currentStep]?.pseudocodeLine ?? -1} />
+      {final && (
+        <div className="mt-4 text-sm text-neon-green">Total Ways: {final?.[final.length - 1]?.[Number(target)] ?? final?.[coinsInput.split(',').length]?.[Number(target)]}</div>
+      )}
+    </>
+  );
+
+  const customInput = (
+    <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
+      <h3 className="text-lg font-semibold neon-text-blue mb-4">Custom Input</h3>
+      <div className="space-y-3">
+        <div>
+          <label className="text-sm text-gray-200">Coins (comma-separated)</label>
+          <input value={coinsInput} onChange={(e) => setCoinsInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
         </div>
-
-        <div className="space-y-6">
-          <PlayerControls isPlaying={isPlaying} onPlayPause={() => setIsPlaying(p => !p)} onReset={() => { setIsPlaying(false); setCurrentStep(0); }} onStepBack={() => setCurrentStep(c => Math.max(0, c - 1))} onStepForward={() => setCurrentStep(c => Math.min(steps.length - 1, c + 1))} speed={speed} onSpeedChange={setSpeed} />
-
-          <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
-            <h3 className="text-lg font-semibold neon-text-green mb-4">Pseudocode</h3>
-            <PseudocodeHighlighter code={pseudocode} highlightLine={steps[currentStep]?.pseudocodeLine ?? -1} />
-            {final && (
-              <div className="mt-4 text-sm text-neon-green">Total Ways: {final?.[final.length - 1]?.[Number(target)] ?? final?.[coinsInput.split(',').length]?.[Number(target)]}</div>
-            )}
-          </div>
+        <div>
+          <label className="text-sm text-gray-200">Target</label>
+          <input type="number" value={target} onChange={(e) => setTarget(Number(e.target.value))} className="w-28 px-3 py-1 bg-[#0b0b10] rounded border border-gray-800 text-white" />
+        </div>
+        <div className="flex items-end">
+          <button onClick={handleApply} className="px-4 py-1 bg-[#39FF14] text-black rounded">Apply</button>
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <DPPageLayout
+      title="Total Ways (Coin Change)"
+      description="Number of ways to make target sum using given coins."
+      visualization={visualization}
+      codeContent={codeContent}
+      infoContent={infoContent}
+      customInput={customInput}
+      playerControls={<PlayerControls isPlaying={isPlaying} onPlayPause={() => setIsPlaying(p => !p)} onReset={() => { setIsPlaying(false); setCurrentStep(0); }} onStepBack={() => setCurrentStep(c => Math.max(0, c - 1))} onStepForward={() => setCurrentStep(c => Math.min(steps.length - 1, c + 1))} speed={speed} onSpeedChange={setSpeed} />}
+    />
   );
 }

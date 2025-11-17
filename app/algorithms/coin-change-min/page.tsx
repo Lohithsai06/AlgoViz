@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { algorithmsList } from '@/lib/algorithms-data';
 import DPTableVisualizer from '@/components/DPTableVisualizer';
+import DPPageLayout from '@/components/DPPageLayout';
+import CodeViewer from '@/components/CodeViewer';
 import PlayerControls from '@/components/PlayerControls';
 import PseudocodeHighlighter from '@/components/PseudocodeHighlighter';
 import { generateSteps_coinChangeMin } from '@/lib/steps/generateSteps_coinChangeMin';
@@ -92,79 +94,10 @@ export default function CoinChangeMinPage() {
     '               dp[amount] = dp[amount - coin] + 1',
   ];
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold neon-text-green mb-2">{algorithm?.title || 'Coin Change (Minimum Coins)'}</h1>
-        <p className="text-gray-400">{algorithm?.description || 'Find minimum coins to reach target using DP.'}</p>
-      </div>
+  const visualization = <DPTableVisualizer steps={mappedSteps} currentStepIndex={currentStep} onRequestStepChange={(i: number) => setCurrentStep(i)} />;
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="glass-card rounded-lg border border-[#39FF14]/20 overflow-hidden">
-            <div className="p-6">
-              <DPTableVisualizer
-                steps={mappedSteps}
-                currentStepIndex={currentStep}
-                onRequestStepChange={(i: number) => setCurrentStep(i)}
-              />
-            </div>
-          </div>
-
-          <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
-            <h3 className="text-lg font-semibold neon-text-blue mb-4">Custom Input</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm text-gray-200">Coins (comma-separated)</label>
-                <input value={coinsInput} onChange={(e) => setCoinsInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
-              </div>
-              <div>
-                <label className="text-sm text-gray-200">Target</label>
-                <input value={targetInput} onChange={(e) => setTargetInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-end">
-                  <button onClick={handleApply} className="px-4 py-1 bg-[#39FF14] text-black rounded">Apply</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <PlayerControls
-            isPlaying={isPlaying}
-            onPlayPause={handlePlayPause}
-            onReset={handleReset}
-            onStepBack={handleStepBack}
-            onStepForward={handleStepForward}
-            speed={speed}
-            onSpeedChange={setSpeed}
-          />
-
-          <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
-            <h3 className="text-lg font-semibold neon-text-green mb-4">Pseudocode</h3>
-            <PseudocodeHighlighter code={pseudocode} highlightLine={mappedSteps[currentStep]?.snapshot?.pseudocodeLine ?? -1} />
-          </div>
-
-          <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
-            <h3 className="text-lg font-semibold neon-text-blue mb-4">Complexity</h3>
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm text-gray-500">Time:</span>
-                <p className="text-[#39FF14] font-mono">O(amount × coins)</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-500">Space:</span>
-                <p className="text-[#00F0FF] font-mono">O(amount)</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
-            <h3 className="text-lg font-semibold neon-text-blue mb-4">Code</h3>
-            <pre className="bg-[#0a0a0f] p-4 rounded-lg text-sm text-gray-300 overflow-x-auto border border-[#00F0FF]/20">
-              <code>{`function coinChange(coins, amount) {
+  const codeContent = (
+    <CodeViewer>{`function coinChange(coins, amount) {
   const dp = Array(amount+1).fill(Infinity);
   dp[0] = 0;
   for (let a = 1; a <= amount; a++) {
@@ -175,11 +108,55 @@ export default function CoinChangeMinPage() {
     }
   }
   return dp[amount] === Infinity ? -1 : dp[amount];
-}`}</code>
-            </pre>
+}`}</CodeViewer>
+  );
+
+  const infoContent = (
+    <>
+      <PseudocodeHighlighter code={pseudocode} highlightLine={mappedSteps[currentStep]?.snapshot?.pseudocodeLine ?? -1} />
+      <div className="mt-4">
+        <div>
+          <span className="text-sm text-gray-500">Time:</span>
+          <p className="text-[#39FF14] font-mono">O(amount × coins)</p>
+        </div>
+        <div>
+          <span className="text-sm text-gray-500">Space:</span>
+          <p className="text-[#00F0FF] font-mono">O(amount)</p>
+        </div>
+      </div>
+    </>
+  );
+
+  const customInput = (
+    <div className="glass-card rounded-lg p-6 border border-[#39FF14]/20">
+      <h3 className="text-lg font-semibold neon-text-blue mb-4">Custom Input</h3>
+      <div className="space-y-3">
+        <div>
+          <label className="text-sm text-gray-200">Coins (comma-separated)</label>
+          <input value={coinsInput} onChange={(e) => setCoinsInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
+        </div>
+        <div>
+          <label className="text-sm text-gray-200">Target</label>
+          <input value={targetInput} onChange={(e) => setTargetInput(e.target.value)} className="w-full px-3 py-2 bg-[#0b0b10] rounded border border-gray-800 text-white" />
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-end">
+            <button onClick={handleApply} className="px-4 py-1 bg-[#39FF14] text-black rounded">Apply</button>
           </div>
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <DPPageLayout
+      title={algorithm?.title || 'Coin Change (Minimum Coins)'}
+      description={algorithm?.description || 'Find minimum coins to reach target using DP.'}
+      visualization={visualization}
+      codeContent={codeContent}
+      infoContent={infoContent}
+      customInput={customInput}
+      playerControls={<PlayerControls isPlaying={isPlaying} onPlayPause={handlePlayPause} onReset={handleReset} onStepBack={handleStepBack} onStepForward={handleStepForward} speed={speed} onSpeedChange={setSpeed} />}
+    />
   );
 }
