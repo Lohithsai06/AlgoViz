@@ -46,7 +46,6 @@
     "autoprefixer": "10.4.15",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "cmdk": "0.3.4",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
     "eslint": "8.49.0",
@@ -69,11 +68,5 @@
     "typescript": "5.2.2",
     "vaul": "^0.9.9",
     "zod": "^3.23.8"
-  },
-  "overrides": {
-    "cmdk": {
-      "react": "19.2.0",
-      "react-dom": "19.2.0"
-    }
   }
 }
